@@ -1,0 +1,57 @@
+# Supabase local/config for H-Ship.
+# project_id is your Supabase project ref; set it before `supabase link`.
+project_id = "h-ship"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "hship://"
+additional_redirect_urls = ["hship://"]
+jwt_expiry = 3600
+enable_signup = true
+# Admin verifies accounts via profiles.verified — no email confirmation gate.
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+# ---- Edge Functions ----
+# The Stripe webhook must NOT require a JWT (Stripe calls it directly; the
+# function verifies the Stripe signature instead).
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.notify-stakeholders]
+verify_jwt = true
+
+[functions.assign-suppliers]
+verify_jwt = true
+
+[functions.submit-for-charter-approval]
+verify_jwt = true
+
+[functions.process-charter-decision]
+verify_jwt = true
+
+[functions.create-payment-intent]
+verify_jwt = true
+
+[functions.activate-order]
+verify_jwt = true
