@@ -2,8 +2,9 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
+  owner: 'dimantha_nishshanka',
   name: 'Marianbridge',
-  slug: 'marianbridge',
+  slug: 'marine',
   scheme: 'marianbridge',
   version: '1.0.0',
   orientation: 'portrait',
@@ -54,7 +55,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       origin: false,
     },
     eas: {
-      projectId: '121f6790-d206-415a-b343-eb12a3bbe801',
+      projectId: 'dd3b4595-8c64-4bc9-a5cd-4a95c9046df4',
     },
   },
   experiments: {

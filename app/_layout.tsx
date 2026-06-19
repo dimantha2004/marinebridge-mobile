@@ -142,8 +142,8 @@ function useAuthGuard() {
     }
 
     if (status === 'authed' && profile) {
-      if (inAuthGroup) {
-        const home = ROLE_HOME[profile.role as UserRole];
+      const home = ROLE_HOME[profile.role as UserRole];
+      if (inAuthGroup || segments[0] !== home.split('/')[1]) {
         router.replace(home as never);
       }
     }

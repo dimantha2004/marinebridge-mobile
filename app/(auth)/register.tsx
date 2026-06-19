@@ -75,7 +75,7 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('captain');
+  const [role, setRole] = useState<UserRole | null>(null);
   const [companyName, setCompanyName] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -103,7 +103,7 @@ export default function RegisterScreen() {
 
   const activeFields = useMemo(() => ROLE_FIELDS[role] ?? [], [role]);
 
-  const handleRoleChange = (newRole: UserRole) => {
+  const handleRoleChange = (newRole: UserRole | null) => {
     setRole(newRole);
     setExtraFields({});
   };
@@ -117,6 +117,7 @@ export default function RegisterScreen() {
     if (username.trim().length < 3) return 'Username must be at least 3 characters.';
     if (!EMAIL_RE.test(email.trim())) return 'Please enter a valid email address.';
     if (password.length < 8) return 'Password must be at least 8 characters.';
+    if (!role) return 'Please select a role.';
     for (const field of activeFields) {
       if (field.required && !(extraFields[field.key] ?? '').trim()) {
         return `${field.label} is required.`;
