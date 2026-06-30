@@ -23,7 +23,6 @@ import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import TimelineTracker from '@/components/shared/TimelineTracker';
 import DocumentCard from '@/components/shared/DocumentCard';
 import MessageThread from '@/components/shared/MessageThread';
-import SupplierAssignedBadge from '@/components/captain/SupplierAssignedBadge';
 import { palette, spacing, radius, fonts } from '@/constants/theme';
 
 const CANCELLABLE = ['draft', 'charter_rejected'];
@@ -188,7 +187,6 @@ export default function OrderDetailScreen() {
                   <View style={styles.accordionBody}>
                     <View style={styles.lineRow}>
                       <OrderStatusBadge status={li.line_status} kind="line" />
-                      <SupplierAssignedBadge supplierName={supplierName} />
                     </View>
 
                     {li.requested_datetime ? (

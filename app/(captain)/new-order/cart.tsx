@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore, type CartItem } from '@/stores/cartStore';
 import { useCreateOrder } from '@/hooks/useOrders';
+import { uploadOrderDocument } from '@/lib/storage';
 import ServiceCartItem from '@/components/captain/ServiceCartItem';
 import { palette, spacing, radius, fonts } from '@/constants/theme';
 
@@ -48,27 +49,34 @@ export default function CartReview() {
     setSubmitting(true);
     setSnack(null);
     try {
-      const orderId = await createOrder.mutateAsync({
+      const { orderId, lineItems } = await createOrder.mutateAsync({
         captainId: userId,
         vessel: buildVesselInfo(),
         items,
         totalAmount: total,
       });
 
-      // Resolve suppliers for each line item.
-      const assignRes = await supabase.functions.invoke('assign-suppliers', {
-        body: { order_id: orderId },
-      });
-      if (assignRes.error) {
-        const ctx = assignRes.error as { context?: { status?: number } };
-        if (ctx.context?.status === 400) {
-          setSnack('Some services have no supplier available at this port. The order was saved as a draft — please adjust and resubmit.');
-        } else {
-          setSnack('Could not assign suppliers. Please try again.');
+      // Upload attached files if any
+      for (const item of items) {
+        if (item.fileUri && item.fileName && item.mimeType) {
+          const matchedLine = lineItems.find((l) => l.service_category_id === item.serviceCategoryId);
+          if (matchedLine) {
+            const { error: uploadErr } = await uploadOrderDocument({
+              orderId,
+              lineItemId: matchedLine.id,
+              fileUri: item.fileUri,
+              fileName: item.fileName,
+              mimeType: item.mimeType,
+              documentType: 'other',
+            });
+            if (uploadErr) {
+              console.error(`Error uploading document for ${item.serviceName}:`, uploadErr);
+            }
+          }
         }
-        setSubmitting(false);
-        return;
       }
+
+
 
       // Submit for charter approval (validates & creates notification server-side).
       const submitRes = await supabase.functions.invoke('submit-for-charter-approval', {
@@ -137,11 +145,7 @@ export default function CartReview() {
           Add More Services
         </Button>
 
-        <Divider style={styles.divider} />
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Order Total (est.)</Text>
-          <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
-        </View>
+
       </ScrollView>
 
       <View style={styles.bottomBar}>

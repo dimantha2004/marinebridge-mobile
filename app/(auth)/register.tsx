@@ -27,7 +27,6 @@ const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: 'charter_party', label: 'Charter Party' },
   { value: 'ship_agent', label: 'Ship Agent' },
   { value: 'port_authority', label: 'Port Authority' },
-  { value: 'supplier', label: 'Supplier' },
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -59,12 +58,7 @@ const ROLE_FIELDS: Record<UserRole, RoleField[]> = {
     { key: 'port_id_text', label: 'Port ID', icon: 'anchor', required: true },
     { key: 'isps_code', label: 'ISPS Code', icon: 'shield-outline', required: true },
   ],
-  supplier: [
-    { key: 'business_no', label: 'Business No', icon: 'store-outline', required: true },
-    { key: 'tin_no', label: 'TIN No', icon: 'receipt', required: true },
-    { key: 'duns_no', label: 'DUNS No', icon: 'numeric', required: true },
-    { key: 'service_category_id', label: 'Service Category', icon: 'cube-outline', required: true },
-  ],
+  supplier: [],
   admin: [],
 };
 
@@ -97,11 +91,11 @@ export default function RegisterScreen() {
   }, []);
 
   const roleLabel = useMemo(
-    () => ROLE_OPTIONS.find((r) => r.value === role)?.label ?? 'Select role',
+    () => ROLE_OPTIONS.find((r) => r.value === role)?.label ?? '',
     [role]
   );
 
-  const activeFields = useMemo(() => ROLE_FIELDS[role] ?? [], [role]);
+  const activeFields = useMemo(() => (role ? ROLE_FIELDS[role] : []), [role]);
 
   const handleRoleChange = (newRole: UserRole | null) => {
     setRole(newRole);
@@ -145,7 +139,7 @@ export default function RegisterScreen() {
       username: username.trim(),
       password,
       full_name: fullName.trim(),
-      role,
+      role: role!,
       company_name: companyName.trim() || null,
       phone: phone.trim() || null,
       ...extra,

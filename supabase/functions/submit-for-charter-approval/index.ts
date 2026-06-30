@@ -67,13 +67,7 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: 'Order has no line items' }, 400);
   }
 
-  const unassigned = lines.filter((l) => !l.supplier_mapping_id).map((l) => l.id);
-  if (unassigned.length > 0) {
-    return json(
-      { ok: false, error: 'All line items must have a supplier assigned', unassigned },
-      400,
-    );
-  }
+
 
   // Move the order into charter approval.
   const { error: statusError } = await supabase

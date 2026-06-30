@@ -42,10 +42,7 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="supplier-mapping"
         options={{
-          title: 'Mapping',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="git-network-outline" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen

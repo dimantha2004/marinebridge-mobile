@@ -26,9 +26,16 @@ export default function ServiceCartItem({ item, onEdit, onRemove }: ServiceCartI
           <Text style={styles.name} numberOfLines={1}>
             {item.serviceName}
           </Text>
-          <Text style={styles.meta}>
-            {item.quantity} {item.unit} · ${item.estimatedUnitPrice.toFixed(2)}/unit
-          </Text>
+          {item.fileName ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+              <Ionicons name="document-attach" size={14} color={palette.engineGreen} />
+              <Text style={{ fontFamily: fonts.body, color: palette.engineGreen, fontSize: 13 }} numberOfLines={1}>
+                {item.fileName}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.meta}>No file attached</Text>
+          )}
           {item.specifications ? (
             <Text style={styles.specs} numberOfLines={1}>
               {item.specifications}
@@ -37,7 +44,6 @@ export default function ServiceCartItem({ item, onEdit, onRemove }: ServiceCartI
         </View>
 
         <View style={styles.right}>
-          <Text style={styles.total}>${item.estimatedTotalPrice.toFixed(2)}</Text>
           <View style={styles.actions}>
             <IconButton
               icon={() => <Ionicons name="create-outline" size={18} color={palette.steelBlue} />}

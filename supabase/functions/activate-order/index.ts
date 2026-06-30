@@ -47,18 +47,14 @@ async function activateOrder(orderId: string) {
   const { data: lines } = await supabase
     .from('order_line_items')
     .select(
-      'id, supplier_mapping_id, supplier_service_mappings(supplier_profile_id, port_id, service_categories(requires_port_authority_approval))',
+      'id, service_categories(requires_port_authority_approval)',
     )
     .eq('order_id', orderId);
 
   let requiresPA = false;
-  const supplierIds = new Set<string>();
 
   for (const line of (lines ?? []) as any[]) {
-    const mapping = line.supplier_service_mappings;
-    if (!mapping) continue;
-    if (mapping.supplier_profile_id) supplierIds.add(mapping.supplier_profile_id);
-    if (mapping.service_categories?.requires_port_authority_approval) requiresPA = true;
+    if (line.service_categories?.requires_port_authority_approval) requiresPA = true;
   }
 
   const newStatus = requiresPA ? 'pending_port_approval' : 'active';
@@ -72,7 +68,6 @@ async function activateOrder(orderId: string) {
   const recipientIds = new Set<string>();
   if (order.ship_agent_id) recipientIds.add(order.ship_agent_id);
   if (order.captain_id) recipientIds.add(order.captain_id);
-  for (const sid of supplierIds) recipientIds.add(sid);
 
   if (requiresPA && order.port_id) {
     const { data: pas } = await supabase

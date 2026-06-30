@@ -18,7 +18,6 @@ import { supabase } from '@/lib/supabase';
 import { useOrderDetail, type LineItemDetail } from '@/hooks/useOrderDetail';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
-import SupplierAssignedBadge from '@/components/captain/SupplierAssignedBadge';
 import { palette, spacing, radius, fonts } from '@/constants/theme';
 
 /** Services that may trigger a charter-clause review (special attention). */
@@ -198,8 +197,7 @@ export default function CharterOrderDetailScreen() {
                         </Text>
                       ) : null}
 
-                      <Divider style={styles.lineDivider} />
-                      <SupplierAssignedBadge supplierName={supplier} />
+
                     </Card.Content>
                   </Card>
                 );

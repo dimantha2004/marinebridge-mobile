@@ -5,13 +5,15 @@ import type { DocumentType, OrderDocument } from '@/types/database';
 
 const BUCKET = 'order-documents';
 
-/** Allowed upload mime types: PDF, JPG, PNG, DOCX. */
+/** Allowed upload mime types: PDF, JPG, PNG, DOCX, XLSX, XLS. */
 export const ALLOWED_MIME_TYPES = [
   'application/pdf',
   'image/jpeg',
   'image/jpg',
   'image/png',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
 ] as const;
 
 export interface UploadOrderDocumentParams {

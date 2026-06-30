@@ -53,7 +53,7 @@ export interface CreateOrderPayload {
 export function useCreateOrder() {
   const queryClient = useQueryClient();
 
-  return useMutation<string, Error, CreateOrderPayload>({
+  return useMutation<{ orderId: string; lineItems: { id: string; service_category_id: string | null }[] }, Error, CreateOrderPayload>({
     mutationFn: async (payload) => {
       const { vessel, items, captainId, totalAmount } = payload;
 
@@ -78,26 +78,31 @@ export function useCreateOrder() {
       if (!order) throw new Error('Failed to create order');
 
       const orderId = order.id;
+      let lineItems: { id: string; service_category_id: string | null }[] = [];
 
       if (items.length > 0) {
         const lineRows = items.map((item) => ({
           order_id: orderId,
           service_category_id: item.serviceCategoryId,
-          quantity: item.quantity,
-          unit: item.unit,
+          quantity: item.quantity ?? 1,
+          unit: item.unit ?? 'units',
           specifications: item.specifications || null,
           special_instructions: item.specialInstructions || null,
           requested_datetime: item.requestedDatetime,
           unit_price: item.estimatedUnitPrice,
           total_price: item.estimatedTotalPrice,
-          line_status: 'pending_supplier' as const,
+          line_status: 'delivered' as const,
         }));
 
-        const { error: lineError } = await supabase.from('order_line_items').insert(lineRows);
+        const { data: insertedLines, error: lineError } = await supabase
+          .from('order_line_items')
+          .insert(lineRows)
+          .select('id, service_category_id');
         if (lineError) throw lineError;
+        lineItems = insertedLines ?? [];
       }
 
-      return orderId;
+      return { orderId, lineItems };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });

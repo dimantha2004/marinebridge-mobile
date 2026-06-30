@@ -11,6 +11,9 @@ export interface CartItem {
   requestedDatetime: string | null;
   estimatedUnitPrice: number;
   estimatedTotalPrice: number;
+  fileUri?: string;
+  fileName?: string;
+  mimeType?: string;
 }
 
 export interface VesselInfo {
