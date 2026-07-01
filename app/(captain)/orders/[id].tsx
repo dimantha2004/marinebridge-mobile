@@ -113,7 +113,6 @@ export default function OrderDetailScreen() {
   }
 
   const canCancel = CANCELLABLE.includes(order.overall_status);
-  const canPay = order.overall_status === 'pending_payment';
 
   return (
     <View style={styles.screen}>
@@ -231,18 +230,6 @@ export default function OrderDetailScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          {canPay ? (
-            <Button
-              mode="contained"
-              style={styles.payBtn}
-              contentStyle={styles.actionBtnContent}
-              labelStyle={styles.actionBtnLabel}
-              icon={() => <Ionicons name="card" size={18} color={palette.fogWhite} />}
-              onPress={() => router.push(`/(captain)/new-order/checkout?id=${order.id}`)}
-            >
-              Pay Now
-            </Button>
-          ) : null}
 
           {canCancel ? (
             <Button

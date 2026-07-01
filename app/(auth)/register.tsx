@@ -36,6 +36,8 @@ interface RoleField {
   label: string;
   icon: string;
   required: boolean;
+  type?: string;
+  options?: { value: string; label: string }[];
 }
 
 const ROLE_FIELDS: Record<UserRole, RoleField[]> = {
@@ -49,6 +51,7 @@ const ROLE_FIELDS: Record<UserRole, RoleField[]> = {
     { key: 'contract_date', label: 'Contract Date', icon: 'calendar-outline', required: true },
   ],
   ship_agent: [
+    { key: 'agent_type', label: 'Agent Type', icon: 'card-account-details-outline', required: true, type: 'select', options: [{ value: 'liner', label: 'Liner Shipping Agent' }, { value: 'tramp', label: 'Tramp Shipping Agent' }] },
     { key: 'company_reg_no', label: 'Company Registration No', icon: 'domain', required: true },
     { key: 'imo_agent_code', label: 'IMO Agent Code', icon: 'qrcode', required: true },
     { key: 'tin_no', label: 'TIN No', icon: 'receipt', required: true },
@@ -82,6 +85,7 @@ export default function RegisterScreen() {
 
   const [serviceCategories, setServiceCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -298,6 +302,48 @@ export default function RegisterScreen() {
                       onPress={() => {
                         setExtra('service_category_id', cat.id);
                         setCategoryMenuOpen(false);
+                      }}
+                    />
+                  ))}
+                </Menu>
+              );
+            }
+            if (field.type === 'select' && field.options) {
+              const selectedOpt = field.options.find((o) => o.value === extraFields[field.key]);
+              return (
+                <Menu
+                  key={field.key}
+                  visible={activeMenuId === field.key}
+                  onDismiss={() => setActiveMenuId(null)}
+                  anchor={
+                    <TextInput
+                      mode="outlined"
+                      label={field.label}
+                      value={selectedOpt?.label ?? ''}
+                      editable={false}
+                      pointerEvents="none"
+                      left={<TextInput.Icon icon={field.icon as any} />}
+                      right={
+                        <TextInput.Icon
+                          icon="menu-down"
+                          onPress={() => setActiveMenuId(field.key)}
+                        />
+                      }
+                      onPressIn={() => setActiveMenuId(field.key)}
+                      style={styles.input}
+                      disabled={submitting}
+                    />
+                  }
+                  contentStyle={styles.menuContent}
+                >
+                  {field.options.map((opt) => (
+                    <Menu.Item
+                      key={opt.value}
+                      title={opt.label}
+                      titleStyle={styles.menuItemTitle}
+                      onPress={() => {
+                        setExtra(field.key, opt.value);
+                        setActiveMenuId(null);
                       }}
                     />
                   ))}

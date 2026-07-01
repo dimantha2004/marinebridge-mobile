@@ -37,6 +37,11 @@ export default function AddServices() {
   const [fileUri, setFileUri] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string | null>(null);
 
+  const [quantity, setQuantity] = useState('1');
+  const [unit, setUnit] = useState('MT');
+  const [specialInstructions, setSpecialInstructions] = useState('');
+  const [fuelType, setFuelType] = useState('');
+  
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -91,8 +96,25 @@ export default function AddServices() {
   const openSheet = (name: string) => {
     const categoryId = categoryIdByName.get(name);
     const existing = categoryId ? getItem(categoryId) : undefined;
+    let existingFuel = '';
+    let existingSpecs = existing?.specifications ?? '';
+    if (existingSpecs.startsWith('Fuel Type: ')) {
+      const firstLineEnd = existingSpecs.indexOf('\n');
+      if (firstLineEnd !== -1) {
+        existingFuel = existingSpecs.substring(11, firstLineEnd);
+        existingSpecs = existingSpecs.substring(firstLineEnd + 1).trim();
+      } else {
+        existingFuel = existingSpecs.substring(11);
+        existingSpecs = '';
+      }
+    }
+
     setActiveName(name);
-    setSpecifications(existing?.specifications ?? '');
+    setQuantity(existing?.quantity?.toString() ?? '1');
+    setUnit(existing?.unit ?? 'MT');
+    setFuelType(existingFuel);
+    setSpecialInstructions(existing?.specialInstructions ?? '');
+    setSpecifications(existingSpecs);
     setRequestedDatetime(existing?.requestedDatetime ?? '');
     setFileName(existing?.fileName ?? null);
     setFileUri(existing?.fileUri ?? null);
@@ -109,20 +131,27 @@ export default function AddServices() {
       closeSheet();
       return;
     }
+    const isSpecialService = activeName === 'Bunkering' || activeName === 'De-bunkering' || activeName === 'Fresh Water Supply';
+    const isFuelRequired = activeName === 'Bunkering' || activeName === 'De-bunkering';
+    
+    const finalSpecs = isFuelRequired && fuelType
+      ? `Fuel Type: ${fuelType}${specifications.trim() ? '\n' + specifications.trim() : ''}`
+      : specifications.trim();
+
     addOrUpdateItem({
       serviceCategoryId: categoryId,
       serviceName: activeName,
       iconName: serviceIconFor(activeName),
-      quantity: 1,
-      unit: 'units',
-      specifications: specifications.trim(),
-      specialInstructions: '',
+      quantity: Number(quantity) || 1,
+      unit: unit.trim() || 'MT',
+      specifications: finalSpecs,
+      specialInstructions: specialInstructions.trim(),
       requestedDatetime: requestedDatetime.trim() || null,
       estimatedUnitPrice: 0,
       estimatedTotalPrice: 0,
-      fileUri: fileUri ?? undefined,
-      fileName: fileName ?? undefined,
-      mimeType: mimeType ?? undefined,
+      fileUri: isSpecialService ? undefined : (fileUri ?? undefined),
+      fileName: isSpecialService ? undefined : (fileName ?? undefined),
+      mimeType: isSpecialService ? undefined : (mimeType ?? undefined),
     });
     closeSheet();
   };
@@ -225,18 +254,85 @@ export default function AddServices() {
               <Text style={styles.sheetTitle}>{activeName}</Text>
             </View>
 
-            <TextInput
-              mode="outlined"
-              label="Manual Message / Order Details"
-              placeholder="Type your message, list requirements, or notes here..."
-              value={specifications}
-              onChangeText={setSpecifications}
-              multiline
-              numberOfLines={4}
-              style={styles.input}
-              outlineColor={palette.hullGray}
-              activeOutlineColor={palette.steelBlue}
-            />
+            {(activeName === 'Bunkering' || activeName === 'De-bunkering' || activeName === 'Fresh Water Supply') ? (
+              <>
+                <View style={styles.qtyRow}>
+                  <TextInput
+                    mode="outlined"
+                    label="Quantity"
+                    value={quantity}
+                    onChangeText={setQuantity}
+                    keyboardType="numeric"
+                    style={[styles.qtyInput, { marginRight: spacing.sm }]}
+                    outlineColor={palette.hullGray}
+                    activeOutlineColor={palette.steelBlue}
+                  />
+                </View>
+
+                <Text style={styles.fieldLabel}>Unit</Text>
+                <View style={styles.unitWrap}>
+                  {['MT', 'litres', 'm3', 'kg'].map((u) => (
+                    <Chip
+                      key={u}
+                      selected={unit === u}
+                      onPress={() => setUnit(u)}
+                      style={[styles.unitChip, unit === u && styles.unitChipSelected]}
+                      textStyle={styles.unitChipText}
+                    >
+                      {u}
+                    </Chip>
+                  ))}
+                </View>
+
+
+
+                {(activeName === 'Bunkering' || activeName === 'De-bunkering') && (
+                  <View style={{ marginBottom: spacing.sm }}>
+                    <Text style={styles.fieldLabel}>Fuel Type (Required)</Text>
+                    <View style={styles.unitWrap}>
+                      {['DMX', 'DMA', 'DMZ', 'DMB', 'DFA', 'DFZ', 'DFB', 'RMA', 'RMB', 'RMD', 'RME', 'RMG', 'RMK'].map((f) => (
+                        <Chip
+                          key={f}
+                          selected={fuelType === f}
+                          onPress={() => setFuelType(f)}
+                          style={[styles.unitChip, fuelType === f && styles.unitChipSelected]}
+                          textStyle={styles.unitChipText}
+                        >
+                          {f}
+                        </Chip>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                <TextInput
+                  mode="outlined"
+                  label="Special Instructions"
+                  value={specialInstructions}
+                  onChangeText={setSpecialInstructions}
+                  multiline
+                  numberOfLines={2}
+                  style={styles.input}
+                  outlineColor={palette.hullGray}
+                  activeOutlineColor={palette.steelBlue}
+                />
+              </>
+            ) : (
+              <>
+                <TextInput
+                  mode="outlined"
+                  label="Manual Message / Order Details"
+                  placeholder="Type your message, list requirements, or notes here..."
+                  value={specifications}
+                  onChangeText={setSpecifications}
+                  multiline
+                  numberOfLines={4}
+                  style={styles.input}
+                  outlineColor={palette.hullGray}
+                  activeOutlineColor={palette.steelBlue}
+                />
+              </>
+            )}
 
             <TextInput
               mode="outlined"
@@ -250,36 +346,44 @@ export default function AddServices() {
               activeOutlineColor={palette.steelBlue}
             />
 
-            <View style={styles.attachmentSection}>
-              <Text style={styles.attachmentLabel}>File Attachment (Excel, PDF, JPG, PNG, DOCX)</Text>
-              {fileName ? (
-                <View style={styles.fileRow}>
-                  <Ionicons name="document-attach" size={20} color={palette.engineGreen} />
-                  <Text style={styles.fileNameText} numberOfLines={1}>
-                    {fileName}
-                  </Text>
-                  <TouchableOpacity onPress={handleRemoveDocument} style={styles.removeFileBtn}>
-                    <Ionicons name="close-circle" size={20} color={palette.alertRed} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <Button
-                  mode="outlined"
-                  onPress={handlePickDocument}
-                  icon="paperclip"
-                  textColor={palette.steelBlue}
-                  style={styles.attachBtn}
-                >
-                  Choose Excel or File
-                </Button>
-              )}
-            </View>
+            {(activeName !== 'Bunkering' && activeName !== 'De-bunkering' && activeName !== 'Fresh Water Supply') && (
+              <View style={styles.attachmentSection}>
+                <Text style={styles.attachmentLabel}>File Attachment (Excel, PDF, JPG, PNG, DOCX)</Text>
+                {fileName ? (
+                  <View style={styles.fileRow}>
+                    <Ionicons name="document-attach" size={20} color={palette.engineGreen} />
+                    <Text style={styles.fileNameText} numberOfLines={1}>
+                      {fileName}
+                    </Text>
+                    <TouchableOpacity onPress={handleRemoveDocument} style={styles.removeFileBtn}>
+                      <Ionicons name="close-circle" size={20} color={palette.alertRed} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Button
+                    mode="outlined"
+                    onPress={handlePickDocument}
+                    icon="paperclip"
+                    textColor={palette.steelBlue}
+                    style={styles.attachBtn}
+                  >
+                    Choose Excel or File
+                  </Button>
+                )}
+              </View>
+            )}
 
             <View style={styles.sheetActions}>
               <Button mode="text" textColor={palette.hullGray} onPress={closeSheet}>
                 Cancel
               </Button>
-              <Button mode="contained" style={styles.saveBtn} labelStyle={styles.saveBtnLabel} onPress={saveItem}>
+              <Button 
+                mode="contained" 
+                style={styles.saveBtn} 
+                labelStyle={styles.saveBtnLabel} 
+                onPress={saveItem}
+                disabled={(activeName === 'Bunkering' || activeName === 'De-bunkering') && !fuelType}
+              >
                 Add to Cart
               </Button>
             </View>

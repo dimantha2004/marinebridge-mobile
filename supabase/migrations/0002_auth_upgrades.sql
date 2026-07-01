@@ -54,6 +54,7 @@ alter table public.profiles
   add column if not exists business_no         text,
   add column if not exists duns_no             text,
   add column if not exists admin_id            text,
+  add column if not exists agent_type          text,
   add column if not exists service_category_id uuid references public.service_categories(id);
 
 -- We do NOT add CHECK constraints per role here because during registration
@@ -115,7 +116,7 @@ begin
   insert into public.profiles (
     id, full_name, role, username, email, company_name, phone, verified,
     passport_no, sid_no, cp_no, imo_no, contract_date,
-    company_reg_no, imo_agent_code, tin_no,
+    agent_type, company_reg_no, imo_agent_code, tin_no,
     unlocode, port_id_text, isps_code,
     business_no, duns_no, admin_id, service_category_id
   )
@@ -133,6 +134,7 @@ begin
     new.raw_user_meta_data->>'cp_no',
     new.raw_user_meta_data->>'imo_no',
     (new.raw_user_meta_data->>'contract_date')::date,
+    new.raw_user_meta_data->>'agent_type',
     new.raw_user_meta_data->>'company_reg_no',
     new.raw_user_meta_data->>'imo_agent_code',
     new.raw_user_meta_data->>'tin_no',
@@ -173,10 +175,12 @@ insert into public.chat_permissions (sender_role, receiver_role) values
   -- Charter Party can chat with Captain, Supplier
   ('charter_party', 'captain'),
   ('charter_party', 'supplier'),
+  ('charter_party', 'ship_agent'),
   ('charter_party', 'admin'),
-  -- Ship Agent can chat with Captain, Supplier
+  -- Ship Agent can chat with Captain, Supplier, Charter Party
   ('ship_agent', 'captain'),
   ('ship_agent', 'supplier'),
+  ('ship_agent', 'charter_party'),
   ('ship_agent', 'admin'),
   -- Supplier can chat with Charter Party and Ship Agent
   ('supplier', 'charter_party'),
@@ -435,3 +439,22 @@ create policy oli_select on public.order_line_items
 -- ----------------------------------------------------------------------------
 -- Add comment for type regeneration reminder
 comment on table public.profiles is 'User profiles with username, email, and role-specific registration fields.';
+
+-- ----------------------------------------------------------------------------
+-- 13. UNIVERSAL ORDER VISIBILITY
+-- ----------------------------------------------------------------------------
+-- Make orders visible to any authenticated user
+drop policy if exists orders_select on public.orders;
+create policy orders_select on public.orders
+  for select using (auth.role() = 'authenticated');
+
+-- Override user_can_access_order to allow everyone
+create or replace function public.user_can_access_order(p_order_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as 
+  select auth.role() = 'authenticated';
+;

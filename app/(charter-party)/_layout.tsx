@@ -31,6 +31,15 @@ export default function CharterPartyLayout() {
         }}
       />
       <Tabs.Screen
+        name="payments"
+        options={{
+          title: 'Payments',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="card-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: 'History',
@@ -50,6 +59,7 @@ export default function CharterPartyLayout() {
       />
       {/* Stack-only routes hidden from the tab bar */}
       <Tabs.Screen name="[orderId]" options={{ href: null }} />
+      <Tabs.Screen name="checkout" options={{ href: null }} />
     </Tabs>
   );
 }

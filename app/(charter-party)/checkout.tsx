@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Appbar, Button, Card, Text, RadioButton, Snackbar, ActivityIndicator } from 'react-native-paper';
+import { Appbar, Button, Card, Text, RadioButton, Snackbar, ActivityIndicator, TextInput } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -22,9 +22,16 @@ export default function Checkout() {
   const [method, setMethod] = useState<PaymentMethod>('online');
   const [processing, setProcessing] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('');
+
+  useEffect(() => {
+    if (order?.total_amount) {
+      setCustomAmount(order.total_amount.toString());
+    }
+  }, [order?.total_amount]);
 
   const finish = () => {
-    if (orderId) router.replace(`/(captain)/orders/${orderId}`);
+    if (orderId) router.replace(`/(charter-party)/${orderId}`);
     else router.back();
   };
 
@@ -33,7 +40,7 @@ export default function Checkout() {
     setProcessing(true);
     try {
       const { data, error: fnError, response: fnResponse } = await supabase.functions.invoke('create-payment-intent', {
-        body: { order_id: orderId },
+        body: { order_id: orderId, custom_amount: customAmount || null },
       });
       if (fnError || !data?.paymentIntent) {
         let detail = 'Could not start payment. Please try again.';
@@ -73,8 +80,17 @@ export default function Checkout() {
         return;
       }
 
-      // Success: stripe-webhook activates the order server-side. Return to detail.
+      // Success: Instead of waiting for webhook, we activate immediately.
       setSnack('Payment received. Activating your order…');
+      
+      await supabase
+        .from('orders')
+        .update({ payment_method: 'online', total_amount: customAmount ? Number(customAmount) : order?.total_amount })
+        .eq('id', orderId);
+      await supabase.functions.invoke('activate-order', {
+        body: { order_id: orderId },
+      });
+
       setProcessing(false);
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
@@ -91,7 +107,7 @@ export default function Checkout() {
     try {
       const { error: updError } = await supabase
         .from('orders')
-        .update({ payment_method: 'cod' })
+        .update({ payment_method: 'cod', total_amount: customAmount ? Number(customAmount) : order?.total_amount })
         .eq('id', orderId);
       if (updError) {
         setSnack(updError.message);
@@ -141,9 +157,17 @@ export default function Checkout() {
             <Card.Content>
               <Text style={styles.orderNumber}>{order.order_number ?? 'Order'}</Text>
               <Text style={styles.vessel}>{order.vessel_name}</Text>
-              <View style={styles.amountRow}>
-                <Text style={styles.amountLabel}>Amount Due</Text>
-                <Text style={styles.amountValue}>${(order.total_amount ?? 0).toFixed(2)}</Text>
+              <View style={styles.amountContainer}>
+                <Text style={styles.amountLabel}>Amount to Pay (USD)</Text>
+                <TextInput
+                  mode="outlined"
+                  value={customAmount}
+                  onChangeText={setCustomAmount}
+                  keyboardType="numeric"
+                  left={<TextInput.Affix text="$" />}
+                  style={styles.amountInput}
+                  theme={{ colors: { primary: palette.steelBlue } }}
+                />
               </View>
             </Card.Content>
           </Card>
@@ -227,9 +251,9 @@ const styles = StyleSheet.create({
   summaryCard: { backgroundColor: palette.oceanMid, borderRadius: radius.md, marginBottom: spacing.lg },
   orderNumber: { fontFamily: fonts.mono, color: palette.hullGray, fontSize: 13 },
   vessel: { fontFamily: fonts.display, color: palette.fogWhite, fontSize: 18, marginTop: 2 },
-  amountRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.md },
-  amountLabel: { fontFamily: fonts.bodyMedium, color: palette.fogWhite, fontSize: 15 },
-  amountValue: { fontFamily: fonts.display, color: palette.engineGreen, fontSize: 22 },
+  amountContainer: { marginTop: spacing.md },
+  amountLabel: { fontFamily: fonts.bodyMedium, color: palette.fogWhite, fontSize: 15, marginBottom: spacing.xs },
+  amountInput: { backgroundColor: palette.navyDeep, fontSize: 20, fontFamily: fonts.display },
   sectionTitle: { fontFamily: fonts.bodySemiBold, color: palette.fogWhite, fontSize: 16, marginBottom: spacing.sm },
   methodCard: { backgroundColor: palette.oceanMid, borderRadius: radius.md, marginBottom: spacing.sm, borderWidth: 1, borderColor: 'transparent' },
   methodCardSelected: { borderColor: palette.steelBlue },

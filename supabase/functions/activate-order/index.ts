@@ -108,7 +108,7 @@ async function activateOrder(orderId: string) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return handleOptions();
+  if (req.method === 'OPTIONS') return handleOptions(req)!;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {

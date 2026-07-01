@@ -22,11 +22,11 @@ const json = (body: unknown, status = 200) =>
   });
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return handleOptions();
+  if (req.method === 'OPTIONS') return handleOptions(req)!;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {
-    const { order_id } = await req.json();
+    const { order_id, custom_amount } = await req.json();
     if (!order_id) return json({ error: 'order_id is required' }, 400);
 
     // Load order.
@@ -38,34 +38,40 @@ Deno.serve(async (req) => {
 
     if (orderErr || !order) return json({ error: 'Order not found' }, 404);
 
-    // Load line items and recompute total server-side (never trust client).
-    // Fall back to quantity * unit_price for line items where total_price is NULL
-    // (e.g. orders created before the total_price field was populated).
-    const { data: lines, error: linesErr } = await supabase
-      .from('order_line_items')
-      .select('total_price, unit_price, quantity')
-      .eq('order_id', order_id);
+    let total = 0;
+    
+    if (custom_amount != null && Number(custom_amount) > 0) {
+      total = Number(custom_amount);
+    } else {
+      // Load line items and recompute total server-side (never trust client).
+      // Fall back to quantity * unit_price for line items where total_price is NULL
+      // (e.g. orders created before the total_price field was populated).
+      const { data: lines, error: linesErr } = await supabase
+        .from('order_line_items')
+        .select('total_price, unit_price, quantity')
+        .eq('order_id', order_id);
 
-    if (linesErr) return json({ error: linesErr.message }, 500);
+      if (linesErr) return json({ error: linesErr.message }, 500);
 
-    // Compute total from line items, falling back through three levels of
-    // data availability so existing orders with NULL pricing columns still work:
-    //   1. total_price (preferred, authoritative)
-    //   2. quantity * unit_price (backfill for old line items)
-    //   3. order.total_amount (last resort — set at order-creation time)
-    let total = (lines ?? []).reduce((sum, l) => {
-      const lineTotal = l.total_price != null
-        ? Number(l.total_price)
-        : (Number(l.unit_price) || 0) * (Number(l.quantity) || 0);
-      return sum + lineTotal;
-    }, 0);
+      // Compute total from line items, falling back through three levels of
+      // data availability so existing orders with NULL pricing columns still work:
+      //   1. total_price (preferred, authoritative)
+      //   2. quantity * unit_price (backfill for old line items)
+      //   3. order.total_amount (last resort — set at order-creation time)
+      total = (lines ?? []).reduce((sum, l) => {
+        const lineTotal = l.total_price != null
+          ? Number(l.total_price)
+          : (Number(l.unit_price) || 0) * (Number(l.quantity) || 0);
+        return sum + lineTotal;
+      }, 0);
 
-    if (total <= 0) {
-      total = Number(order.total_amount) || 0;
-    }
-
-    if (total <= 0) {
-      return json({ error: 'Order total must be greater than zero' }, 400);
+      if (total <= 0) {
+        total = Number(order.total_amount) || 0;
+      }
+      
+      if (total < 1) {
+        total = 1.00; // Fallback to $1.00 so $0 test orders can still show the Stripe UI safely
+      }
     }
 
     const amount = Math.round(total * 100); // cents (USD)

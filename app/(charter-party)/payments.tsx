@@ -21,7 +21,7 @@ function formatAmount(value: number | null): string {
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export default function CharterApprovalsScreen() {
+export default function CharterPayments() {
   const router = useRouter();
   const userId = useAuthStore((s) => s.session?.user?.id ?? null);
 
@@ -35,14 +35,14 @@ export default function CharterApprovalsScreen() {
   );
 
   const pending = useMemo(
-    () => orders.filter((o: Order) => o.overall_status === 'pending_charter_approval'),
+    () => orders.filter((o: Order) => o.overall_status === 'pending_payment'),
     [orders],
   );
 
   return (
     <View style={styles.screen}>
       <Appbar.Header style={styles.appbar}>
-        <Appbar.Content title="Approval Requests" titleStyle={styles.appbarTitle} />
+        <Appbar.Content title="Payments" titleStyle={styles.appbarTitle} />
       </Appbar.Header>
 
       {isLoading ? (
@@ -52,12 +52,12 @@ export default function CharterApprovalsScreen() {
       ) : error ? (
         <View style={styles.stateBox}>
           <Ionicons name="warning-outline" size={28} color={palette.alertRed} />
-          <Text style={styles.stateText}>Couldn't load approval requests.</Text>
+          <Text style={styles.stateText}>Couldn't load payments.</Text>
         </View>
       ) : pending.length === 0 ? (
         <View style={styles.stateBox}>
           <Ionicons name="checkmark-done-circle-outline" size={36} color={palette.hullGray} />
-          <Text style={styles.stateText}>No pending approvals. You're all caught up.</Text>
+          <Text style={styles.stateText}>No pending payments. You're all caught up.</Text>
         </View>
       ) : (
         <FlatList

@@ -63,6 +63,7 @@ export interface Database {
           cp_no: string | null;
           imo_no: string | null;
           contract_date: string | null;
+          agent_type: string | null;
           company_reg_no: string | null;
           imo_agent_code: string | null;
           tin_no: string | null;
@@ -91,6 +92,7 @@ export interface Database {
           cp_no?: string | null;
           imo_no?: string | null;
           contract_date?: string | null;
+          agent_type?: string | null;
           company_reg_no?: string | null;
           imo_agent_code?: string | null;
           tin_no?: string | null;

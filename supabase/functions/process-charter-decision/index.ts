@@ -30,7 +30,7 @@ async function sendPush(pushToken: string | null, title: string, body: string, d
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return handleOptions();
+  if (req.method === 'OPTIONS') return handleOptions(req)!;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {
@@ -84,14 +84,14 @@ Deno.serve(async (req) => {
     // Notify the captain of the rejection.
     if (order.captain_id) {
       const title = 'Order Rejected by Charterer';
-      const body = comments
+      const notifBody = comments
         ? `Order ${order.order_number ?? ''} was rejected: ${comments}`.trim()
         : `Order ${order.order_number ?? ''} was rejected by the charterer.`.trim();
 
       await supabase.from('notifications').insert({
         recipient_id: order.captain_id,
         title,
-        body,
+        body: notifBody,
         type: 'order_update',
         order_id,
         read: false,
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
         .eq('id', order.captain_id)
         .single();
 
-      await sendPush(captain?.push_token ?? null, title, body, { order_id });
+      await sendPush(captain?.push_token ?? null, title, notifBody, { order_id });
     }
 
     return json({ ok: true });

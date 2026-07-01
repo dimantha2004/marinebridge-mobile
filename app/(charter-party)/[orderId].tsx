@@ -71,6 +71,7 @@ export default function CharterOrderDetailScreen() {
   );
 
   const decided = order != null && order.overall_status !== 'pending_charter_approval';
+  const canPay = order?.overall_status === 'pending_payment';
 
   async function submitDecision(decision: Decision) {
     if (!orderId || submitting) return;
@@ -177,18 +178,12 @@ export default function CharterOrderDetailScreen() {
                         <Text style={styles.lineName} numberOfLines={1}>
                           {name}
                         </Text>
-                        <Text style={styles.lineTotal}>{formatAmount(line.total_price)}</Text>
                       </View>
 
                       <View style={styles.lineMetaRow}>
                         <Text style={styles.lineMeta}>
                           Qty: {line.quantity ?? '—'} {line.unit ?? ''}
                         </Text>
-                        {line.unit_price != null && (
-                          <Text style={styles.lineMeta}>
-                            @ {formatAmount(line.unit_price)}
-                          </Text>
-                        )}
                       </View>
 
                       {line.specifications ? (
@@ -204,19 +199,29 @@ export default function CharterOrderDetailScreen() {
               })
             )}
 
-            {/* Total */}
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Order Total</Text>
-              <Text style={styles.totalValue}>{formatAmount(order.total_amount)}</Text>
-            </View>
+
 
             {/* Decision section */}
             {decided ? (
-              <View style={styles.decidedBox}>
-                <Ionicons name="information-circle-outline" size={18} color={palette.hullGray} />
-                <Text style={styles.decidedText}>
-                  This order is no longer pending charter approval.
-                </Text>
+              <View style={{ gap: spacing.md, paddingBottom: spacing.md }}>
+                <View style={styles.decidedBox}>
+                  <Ionicons name="information-circle-outline" size={18} color={palette.hullGray} />
+                  <Text style={styles.decidedText}>
+                    This order is no longer pending charter approval.
+                  </Text>
+                </View>
+                {canPay ? (
+                  <Button
+                    mode="contained"
+                    style={{ backgroundColor: palette.steelBlue, borderRadius: radius.md }}
+                    contentStyle={{ height: 48 }}
+                    labelStyle={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }}
+                    icon={() => <Ionicons name="card" size={18} color={palette.fogWhite} />}
+                    onPress={() => router.push(`/(charter-party)/checkout?id=${order.id}`)}
+                  >
+                    Pay Now
+                  </Button>
+                ) : null}
               </View>
             ) : (
               <>
