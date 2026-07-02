@@ -28,6 +28,8 @@ export type OverallStatus =
 
 export type LineStatus =
   | 'pending_supplier'
+  | 'supplier_quoted'
+  | 'pending_charter_selection'
   | 'supplier_accepted'
   | 'supplier_declined'
   | 'preparing'
@@ -382,6 +384,28 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['admin_password_resets']['Insert']>;
         Relationships: [];
       };
+      supplier_quotations: {
+        Row: {
+          id: string;
+          order_line_item_id: string;
+          supplier_profile_id: string | null;
+          amount: number;
+          description: string | null;
+          is_selected: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_line_item_id: string;
+          supplier_profile_id?: string | null;
+          amount: number;
+          description?: string | null;
+          is_selected?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['supplier_quotations']['Insert']>;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -413,3 +437,4 @@ export type Notification = Database['public']['Tables']['notifications']['Row'];
 export type ChatPermission = Database['public']['Tables']['chat_permissions']['Row'];
 export type ActiveSession = Database['public']['Tables']['active_sessions']['Row'];
 export type AdminPasswordReset = Database['public']['Tables']['admin_password_resets']['Row'];
+export type SupplierQuotation = Database['public']['Tables']['supplier_quotations']['Row'];

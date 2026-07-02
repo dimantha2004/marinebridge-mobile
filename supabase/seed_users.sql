@@ -71,6 +71,13 @@ begin
               'supplier'||v_seq||'@marianbridge.test', v_cat.name||' Co', true,
               'BN-'||lpad(v_seq::text,3,'0'), 'DUNS-'||lpad(v_seq::text,3,'0'), v_cat.id)
       on conflict (id) do nothing;
+
+    -- Map this supplier to all ports automatically for testing
+    insert into public.supplier_service_mappings (port_id, service_category_id, supplier_profile_id, active)
+    select p.id, v_cat.id, v_uid, true
+    from public.ports p
+    on conflict (port_id, service_category_id) do update
+    set supplier_profile_id = excluded.supplier_profile_id;
   end loop;
 end $$;
 
