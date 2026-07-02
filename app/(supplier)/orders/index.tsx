@@ -81,14 +81,17 @@ export default function SupplierOrders() {
         ) : null}
       </View>
 
-      {li.quantity != null ? (
-        <View style={styles.metaRow}>
-          <Ionicons name="cube-outline" size={14} color={palette.hullGray} />
-          <Text style={styles.metaText}>
-            {li.quantity} {li.unit ?? ''}
-          </Text>
-        </View>
-      ) : null}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xs }}>
+        {li.quantity != null ? (
+          <View style={[styles.metaRow, { marginTop: 0 }]}>
+            <Ionicons name="cube-outline" size={14} color={palette.hullGray} />
+            <Text style={styles.metaText}>
+              {li.quantity} {li.unit ?? ''}
+            </Text>
+          </View>
+        ) : <View />}
+        <Ionicons name="chatbubbles-outline" size={22} color={palette.steelBlue} style={{ marginRight: spacing.xs }} />
+      </View>
     </Pressable>
   );
 

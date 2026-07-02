@@ -124,6 +124,7 @@ export default function SupplierDashboard() {
                     <View style={styles.itemBody}>
                       <Text style={styles.itemService} numberOfLines={1}>
                         {li.service_categories?.name ?? 'Service'}
+                        {li.order?.order_number ? ` (${li.order.order_number})` : ''}
                       </Text>
                       <Text style={styles.itemVessel} numberOfLines={1}>
                         {li.order?.vessel_name ?? 'Vessel'} ·{' '}
@@ -134,6 +135,9 @@ export default function SupplierDashboard() {
                           ETA {dayjs(li.order.eta).format('MMM D, HH:mm')}
                         </Text>
                       ) : null}
+                    </View>
+                    <View style={{ padding: spacing.xs, marginRight: spacing.xs }}>
+                      <Ionicons name="chatbubbles-outline" size={22} color={palette.steelBlue} />
                     </View>
                     <Ionicons
                       name="chevron-forward"
