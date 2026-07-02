@@ -217,7 +217,7 @@ export default function CharterOrderDetailScreen() {
                     contentStyle={{ height: 48 }}
                     labelStyle={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }}
                     icon={() => <Ionicons name="card" size={18} color={palette.fogWhite} />}
-                    onPress={() => router.push(`/(charter-party)/checkout?id=${order.id}`)}
+                    onPress={() => router.push(`/(charter-party)/checkout?id=${order.id}` as any)}
                   >
                     Pay Now
                   </Button>

@@ -36,7 +36,6 @@ const ROLE_LABEL: Record<string, string> = {
   captain: 'Captain',
   charter_party: 'Charter Party',
   ship_agent: 'Ship Agent',
-  port_authority: 'Port Authority',
   supplier: 'Supplier',
   admin: 'Admin',
 };
@@ -45,7 +44,6 @@ const ROLE_COLOR: Record<UserRole, string> = {
   captain: palette.steelBlue,
   charter_party: palette.signalAmber,
   ship_agent: palette.engineGreen,
-  port_authority: '#8B5CF6',
   supplier: '#06B6D4',
   admin: palette.alertRed,
 };
@@ -240,11 +238,7 @@ export default function AdminUsersScreen() {
         roleSpecific.push({ label: 'IMO Agent Code', value: p.imo_agent_code });
         roleSpecific.push({ label: 'TIN No', value: p.tin_no });
         break;
-      case 'port_authority':
-        roleSpecific.push({ label: 'UN/LOCODE', value: p.unlocode });
-        roleSpecific.push({ label: 'Port ID', value: p.port_id_text });
-        roleSpecific.push({ label: 'ISPS Code', value: p.isps_code });
-        break;
+
       case 'supplier':
         roleSpecific.push({ label: 'Business No', value: p.business_no });
         roleSpecific.push({ label: 'TIN No', value: p.tin_no });

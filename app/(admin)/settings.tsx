@@ -76,7 +76,7 @@ export default function AdminSettingsScreen() {
 
         <Text style={styles.sectionTitle}>Service Catalog</Text>
         <Text style={styles.sectionHint}>
-          Read-only. PA = requires Port Authority approval.
+          Read-only.
         </Text>
 
         {isLoading ? (
@@ -115,21 +115,7 @@ export default function AdminSettingsScreen() {
                     />
                   </View>
                 )}
-                right={() =>
-                  cat.requires_port_authority_approval ? (
-                    <Chip
-                      compact
-                      style={styles.paChip}
-                      textStyle={styles.paChipText}
-                    >
-                      PA
-                    </Chip>
-                  ) : (
-                    <View style={styles.noPa}>
-                      <Text style={styles.noPaText}>No approval</Text>
-                    </View>
-                  )
-                }
+
               />
             ))}
           </Card>

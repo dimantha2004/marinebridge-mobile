@@ -26,7 +26,6 @@ const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: 'captain', label: 'Captain' },
   { value: 'charter_party', label: 'Charter Party' },
   { value: 'ship_agent', label: 'Ship Agent' },
-  { value: 'port_authority', label: 'Port Authority' },
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,11 +54,6 @@ const ROLE_FIELDS: Record<UserRole, RoleField[]> = {
     { key: 'company_reg_no', label: 'Company Registration No', icon: 'domain', required: true },
     { key: 'imo_agent_code', label: 'IMO Agent Code', icon: 'qrcode', required: true },
     { key: 'tin_no', label: 'TIN No', icon: 'receipt', required: true },
-  ],
-  port_authority: [
-    { key: 'unlocode', label: 'UN/LOCODE', icon: 'map-marker-outline', required: true },
-    { key: 'port_id_text', label: 'Port ID', icon: 'anchor', required: true },
-    { key: 'isps_code', label: 'ISPS Code', icon: 'shield-outline', required: true },
   ],
   supplier: [],
   admin: [],

@@ -46,18 +46,10 @@ async function activateOrder(orderId: string) {
 
   const { data: lines } = await supabase
     .from('order_line_items')
-    .select(
-      'id, service_categories(requires_port_authority_approval)',
-    )
+    .select('id')
     .eq('order_id', orderId);
 
-  let requiresPA = false;
-
-  for (const line of (lines ?? []) as any[]) {
-    if (line.service_categories?.requires_port_authority_approval) requiresPA = true;
-  }
-
-  const newStatus = requiresPA ? 'pending_port_approval' : 'active';
+  const newStatus = 'active';
 
   const { error: updateErr } = await supabase
     .from('orders')
@@ -69,18 +61,8 @@ async function activateOrder(orderId: string) {
   if (order.ship_agent_id) recipientIds.add(order.ship_agent_id);
   if (order.captain_id) recipientIds.add(order.captain_id);
 
-  if (requiresPA && order.port_id) {
-    const { data: pas } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('role', 'port_authority');
-    for (const pa of pas ?? []) recipientIds.add(pa.id);
-  }
-
-  const title = requiresPA ? 'Order Awaiting Port Approval' : 'Order Activated';
-  const body = requiresPA
-    ? `Order ${order.order_number ?? ''} is awaiting port authority approval.`.trim()
-    : `Order ${order.order_number ?? ''} is now active.`.trim();
+  const title = 'Order Activated';
+  const body = `Order ${order.order_number ?? ''} is now active.`.trim();
 
   const ids = [...recipientIds];
   if (ids.length) {
@@ -104,7 +86,7 @@ async function activateOrder(orderId: string) {
     }
   }
 
-  return { requiresPA, newStatus };
+  return { requiresPA: false, newStatus };
 }
 
 Deno.serve(async (req) => {

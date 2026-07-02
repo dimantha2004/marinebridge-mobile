@@ -12,7 +12,6 @@ export type UserRole =
   | 'captain'
   | 'charter_party'
   | 'ship_agent'
-  | 'port_authority'
   | 'supplier'
   | 'admin';
 
@@ -129,13 +128,11 @@ export interface Database {
         Row: {
           id: string;
           name: string;
-          requires_port_authority_approval: boolean;
           icon_name: string | null;
         };
         Insert: {
           id?: string;
           name: string;
-          requires_port_authority_approval?: boolean;
           icon_name?: string | null;
         };
         Update: Partial<Database['public']['Tables']['service_categories']['Insert']>;
@@ -392,7 +389,6 @@ export interface Database {
       current_user_verified: { Args: Record<string, never>; Returns: boolean };
       user_can_access_order: { Args: { p_order_id: string }; Returns: boolean };
       supplier_owns_line_item: { Args: { p_line_item_id: string }; Returns: boolean };
-      port_authority_sees_order: { Args: { p_order_id: string }; Returns: boolean };
       can_chat: { Args: { sender_id: string; receiver_id: string }; Returns: boolean };
       admin_initiate_password_reset: { Args: { target_user_id: string }; Returns: string };
       get_user_email_for_reset: { Args: { target_user_id: string }; Returns: string };

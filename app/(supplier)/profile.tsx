@@ -11,7 +11,6 @@ const ROLE_META: Record<UserRole, { label: string; icon: keyof typeof Ionicons.g
   captain: { label: 'Captain', icon: 'boat' },
   charter_party: { label: 'Charter Party', icon: 'document-text' },
   ship_agent: { label: 'Ship Agent', icon: 'navigate' },
-  port_authority: { label: 'Port Authority', icon: 'shield-checkmark' },
   supplier: { label: 'Supplier', icon: 'cube' },
   admin: { label: 'Admin', icon: 'settings' },
 };

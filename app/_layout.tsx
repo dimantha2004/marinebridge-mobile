@@ -203,7 +203,6 @@ function GuardedStack() {
         <Stack.Screen name="(captain)" />
         <Stack.Screen name="(charter-party)" />
         <Stack.Screen name="(ship-agent)" />
-        <Stack.Screen name="(port-authority)" />
         <Stack.Screen name="(supplier)" />
         <Stack.Screen name="(admin)" />
       </Stack>

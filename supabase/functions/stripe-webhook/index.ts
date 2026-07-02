@@ -44,25 +44,23 @@ async function activateOrder(orderId: string) {
     .single();
   if (orderErr || !order) return;
 
-  // Load lines with their mapping -> service category (PA flag) and supplier.
+  // Load lines with their mapping -> supplier.
   const { data: lines } = await supabase
     .from('order_line_items')
     .select(
-      'id, supplier_mapping_id, supplier_service_mappings(supplier_profile_id, port_id, service_categories(requires_port_authority_approval))',
+      'id, supplier_mapping_id, supplier_service_mappings(supplier_profile_id, port_id)',
     )
     .eq('order_id', orderId);
 
-  let requiresPA = false;
   const supplierIds = new Set<string>();
 
   for (const line of (lines ?? []) as any[]) {
     const mapping = line.supplier_service_mappings;
     if (!mapping) continue;
     if (mapping.supplier_profile_id) supplierIds.add(mapping.supplier_profile_id);
-    if (mapping.service_categories?.requires_port_authority_approval) requiresPA = true;
   }
 
-  const newStatus = requiresPA ? 'pending_port_approval' : 'active';
+  const newStatus = 'active';
 
   await supabase
     .from('orders')
@@ -75,19 +73,8 @@ async function activateOrder(orderId: string) {
   if (order.captain_id) recipientIds.add(order.captain_id);
   for (const sid of supplierIds) recipientIds.add(sid);
 
-  // Port authorities for this port (only when PA approval is required).
-  if (requiresPA && order.port_id) {
-    const { data: pas } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('role', 'port_authority');
-    for (const pa of pas ?? []) recipientIds.add(pa.id);
-  }
-
-  const title = requiresPA ? 'Order Awaiting Port Approval' : 'Order Activated';
-  const body = requiresPA
-    ? `Order ${order.order_number ?? ''} is paid and awaiting port authority approval.`.trim()
-    : `Order ${order.order_number ?? ''} is paid and now active.`.trim();
+  const title = 'Order Activated';
+  const body = `Order ${order.order_number ?? ''} is paid and now active.`.trim();
 
   const ids = [...recipientIds];
   if (ids.length) {

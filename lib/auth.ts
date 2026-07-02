@@ -11,7 +11,6 @@ export const ROLE_HOME: Record<UserRole, string> = {
   captain: '/(captain)/dashboard',
   charter_party: '/(charter-party)/approvals',
   ship_agent: '/(ship-agent)/hub',
-  port_authority: '/(port-authority)/dashboard',
   supplier: '/(supplier)/dashboard',
   admin: '/(admin)/users',
 };

@@ -53,15 +53,7 @@ begin
     values (v_uid, 'Ship Agent User', 'ship_agent', 'ship_agent', 'ship-agent@marianbridge.test', 'Ship Agent Ltd', true, 'CR-002','IAC-002','TIN-002')
     on conflict (id) do nothing;
 
-  -- port authority
-  v_uid := gen_random_uuid();
-  insert into auth.users (id, email, encrypted_password, email_confirmed_at, instance_id, role, aud, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
-    values (v_uid, 'port-authority@marianbridge.test', crypt('20040701@Dd', gen_salt('bf')), now(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '{}'::jsonb,
-            jsonb_build_object('role','port_authority','username','port_authority','full_name','Port Authority User',
-              'unlocode','UNL-001','port_id_text','Port Alpha','isps_code','ISPS-001'), now(), now());
-  insert into public.profiles (id, full_name, role, username, email, verified, unlocode, port_id_text, isps_code)
-    values (v_uid, 'Port Authority User', 'port_authority', 'port_authority', 'port-authority@marianbridge.test', true, 'UNL-001','Port Alpha','ISPS-001')
-    on conflict (id) do nothing;
+
 
   -- suppliers (one per category)
   for v_cat in select id, name from public.service_categories order by name loop

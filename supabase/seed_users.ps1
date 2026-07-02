@@ -25,7 +25,6 @@ $users = @(
   @{ email = "captain@marianbridge.test"; role = "captain"; username = "captain"; full_name = "Captain User" }
   @{ email = "charter-party@marianbridge.test"; role = "charter_party"; username = "charter_party"; full_name = "Charter Party User" }
   @{ email = "ship-agent@marianbridge.test"; role = "ship_agent"; username = "ship_agent"; full_name = "Ship Agent User" }
-  @{ email = "port-authority@marianbridge.test"; role = "port_authority"; username = "port_authority"; full_name = "Port Authority User" }
 )
 
 function Create-SupabaseUser {

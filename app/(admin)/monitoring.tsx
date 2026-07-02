@@ -19,7 +19,6 @@ const ROLE_LABEL: Record<UserRole, string> = {
   captain: 'Captain',
   charter_party: 'Charter Party',
   ship_agent: 'Ship Agent',
-  port_authority: 'Port Authority',
   supplier: 'Supplier',
   admin: 'Admin',
 };
@@ -28,7 +27,6 @@ const ROLE_COLOR: Record<UserRole, string> = {
   captain: palette.steelBlue,
   charter_party: palette.signalAmber,
   ship_agent: palette.engineGreen,
-  port_authority: '#8B5CF6',
   supplier: '#06B6D4',
   admin: palette.alertRed,
 };
