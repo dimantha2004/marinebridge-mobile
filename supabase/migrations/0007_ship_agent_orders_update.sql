@@ -1,0 +1,1 @@
+﻿CREATE POLICY orders_ship_agent_update ON public.orders FOR UPDATE USING (public.current_user_role() = 'ship_agent' AND public.user_can_access_order(id)) WITH CHECK (public.current_user_role() = 'ship_agent' AND public.user_can_access_order(id));

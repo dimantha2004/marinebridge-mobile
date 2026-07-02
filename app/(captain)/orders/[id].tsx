@@ -38,6 +38,7 @@ export default function OrderDetailScreen() {
 
   const [chatLineItem, setChatLineItem] = useState<LineItemDetail | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [markingCompleted, setMarkingCompleted] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
 
   // Realtime: live updates for this order + its line items.
@@ -87,6 +88,22 @@ export default function OrderDetailScreen() {
     }
     await refetch();
     setSnack('Order cancelled.');
+  };
+
+  const handleMarkCompleted = async () => {
+    if (!orderId) return;
+    setMarkingCompleted(true);
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ overall_status: 'completed' })
+      .eq('id', orderId);
+    setMarkingCompleted(false);
+    if (updateError) {
+      setSnack(updateError.message);
+      return;
+    }
+    await refetch();
+    setSnack('Order marked as Completed.');
   };
 
   if (isLoading) {
@@ -230,6 +247,19 @@ export default function OrderDetailScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
+          {order.overall_status === 'in_execution' ? (
+            <Button
+              mode="contained"
+              loading={markingCompleted}
+              disabled={markingCompleted}
+              style={styles.payBtn}
+              contentStyle={styles.actionBtnContent}
+              labelStyle={styles.actionBtnLabel}
+              onPress={handleMarkCompleted}
+            >
+              Mark Completed
+            </Button>
+          ) : null}
 
           {canCancel ? (
             <Button

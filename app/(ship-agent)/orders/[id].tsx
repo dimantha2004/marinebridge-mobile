@@ -38,6 +38,7 @@ export default function ShipAgentOrderDetail() {
 
   const [chatLineItem, setChatLineItem] = useState<LineItemDetail | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [markingInExecution, setMarkingInExecution] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
 
   // Realtime: live updates for this order + its line items + documents.
@@ -110,6 +111,22 @@ export default function ShipAgentOrderDetail() {
       return;
     }
     Linking.openURL(url).catch(() => setSnack('Could not open document.'));
+  };
+
+  const handleMarkInExecution = async () => {
+    if (!orderId) return;
+    setMarkingInExecution(true);
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ overall_status: 'in_execution' })
+      .eq('id', orderId);
+    setMarkingInExecution(false);
+    if (updateError) {
+      setSnack(updateError.message);
+      return;
+    }
+    await refetch();
+    setSnack('Order marked as In Execution.');
   };
 
   if (isLoading) {
@@ -268,6 +285,18 @@ export default function ShipAgentOrderDetail() {
             <DocumentCard key={doc.id} document={doc} onOpen={handleOpenDoc} />
           ))
         )}
+
+        {order.overall_status === 'active' ? (
+          <Button
+            mode="contained"
+            loading={markingInExecution}
+            disabled={markingInExecution}
+            style={styles.actionBtn}
+            onPress={handleMarkInExecution}
+          >
+            Mark In Execution
+          </Button>
+        ) : null}
       </ScrollView>
 
       {/* Chat modal */}
@@ -346,6 +375,7 @@ const styles = StyleSheet.create({
   docsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   uploadBtn: { backgroundColor: palette.steelBlue, borderRadius: radius.sm },
   uploadBtnLabel: { fontFamily: fonts.bodySemiBold, fontSize: 13 },
+  actionBtn: { marginTop: spacing.xl, backgroundColor: palette.steelBlue, borderRadius: radius.sm, paddingVertical: spacing.xs },
   chatModal: { backgroundColor: palette.navyDeep, margin: spacing.md, borderRadius: radius.lg, height: '80%', overflow: 'hidden' },
   chatHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.md, paddingTop: spacing.sm },
   chatTitle: { fontFamily: fonts.bodySemiBold, color: palette.fogWhite, fontSize: 16 },

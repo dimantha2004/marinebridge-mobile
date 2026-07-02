@@ -11,8 +11,8 @@ import type { UserRole } from '@/types/database';
  * - Admin ↔ All
  */
 const CHAT_MATRIX: Record<UserRole, Set<UserRole>> = {
-  captain: new Set<UserRole>(['charter_party', 'ship_agent', 'admin']),
-  charter_party: new Set<UserRole>(['captain', 'ship_agent', 'supplier', 'admin']),
+  captain: new Set<UserRole>(['charter_party', 'ship_agent']),
+  charter_party: new Set<UserRole>(['captain', 'ship_agent']),
   ship_agent: new Set<UserRole>(['captain', 'charter_party', 'supplier', 'admin']),
   supplier: new Set<UserRole>(['ship_agent']),
   admin: new Set<UserRole>(['captain', 'charter_party', 'ship_agent', 'supplier']),

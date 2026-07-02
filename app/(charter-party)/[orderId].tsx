@@ -30,11 +30,6 @@ function formatAmount(value: number | null | undefined): string {
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function supplierLabel(line: LineItemDetail): string | null {
-  const profile = line.supplier_mapping?.supplier_profile;
-  if (!profile) return null;
-  return profile.company_name || profile.full_name || null;
-}
 
 export default function CharterOrderDetailScreen() {
   const router = useRouter();
@@ -167,7 +162,6 @@ export default function CharterOrderDetailScreen() {
             ) : (
               lineItems.map((line: LineItemDetail) => {
                 const name = line.service_categories?.name ?? 'Service';
-                const supplier = supplierLabel(line);
                 return (
                   <Card key={line.id} style={styles.lineCard} mode="contained">
                     <Card.Content>
@@ -189,11 +183,6 @@ export default function CharterOrderDetailScreen() {
                         ) : null}
                       </View>
 
-                      {supplier ? (
-                        <Text style={[styles.lineMeta, { marginTop: spacing.xs }]}>
-                          Supplier: {supplier}
-                        </Text>
-                      ) : null}
 
                       {line.specifications ? (
                         <Text style={styles.lineSpec} numberOfLines={3}>
