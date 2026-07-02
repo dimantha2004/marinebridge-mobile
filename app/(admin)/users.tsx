@@ -108,7 +108,7 @@ export default function AdminUsersScreen() {
         .from('profiles')
         .update({ verified: true })
         .eq('id', id);
-      if (updErr) throw updErr;
+      if (updErr) throw new Error(updErr.message);
     },
     onSuccess: () => {
       setSnack('Account verified.');
@@ -128,7 +128,7 @@ export default function AdminUsersScreen() {
         .from('profiles')
         .delete()
         .eq('id', profile.id);
-      if (profileErr) throw profileErr;
+      if (profileErr) throw new Error(profileErr.message);
     },
     onSuccess: () => {
       setSnack('Account rejected and removed.');
@@ -146,7 +146,7 @@ export default function AdminUsersScreen() {
         .from('profiles')
         .delete()
         .eq('id', profile.id);
-      if (profileErr) throw profileErr;
+      if (profileErr) throw new Error(profileErr.message);
     },
     onSuccess: () => {
       setSnack('User deleted permanently.');
