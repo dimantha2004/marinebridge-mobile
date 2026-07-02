@@ -184,7 +184,16 @@ export default function CharterOrderDetailScreen() {
                         <Text style={styles.lineMeta}>
                           Qty: {line.quantity ?? '—'} {line.unit ?? ''}
                         </Text>
+                        {line.unit_price != null ? (
+                          <Text style={styles.lineMeta}>@ {formatAmount(line.unit_price)}</Text>
+                        ) : null}
                       </View>
+
+                      {supplier ? (
+                        <Text style={[styles.lineMeta, { marginTop: spacing.xs }]}>
+                          Supplier: {supplier}
+                        </Text>
+                      ) : null}
 
                       {line.specifications ? (
                         <Text style={styles.lineSpec} numberOfLines={3}>
@@ -192,14 +201,26 @@ export default function CharterOrderDetailScreen() {
                         </Text>
                       ) : null}
 
-
+                      {line.total_price != null ? (
+                        <View style={{ marginTop: spacing.sm, alignItems: 'flex-end' }}>
+                          <Text style={styles.lineTotal}>{formatAmount(line.total_price)}</Text>
+                        </View>
+                      ) : null}
                     </Card.Content>
                   </Card>
                 );
               })
             )}
 
-
+            {order?.total_amount != null && (
+              <>
+                <Divider style={styles.lineDivider} />
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Total Amount</Text>
+                  <Text style={styles.totalValue}>{formatAmount(order.total_amount)}</Text>
+                </View>
+              </>
+            )}
 
             {/* Decision section */}
             {decided ? (
